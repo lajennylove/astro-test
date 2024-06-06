@@ -1,0 +1,39 @@
+pipelines:
+  branches:
+    master:
+      - step:
+          name: Build assets
+          image: node:18.17.1
+          script:
+            # Install dependencies and build assets
+            - npm install
+            - npm run build
+            # Save build assets as an artifact
+          artifacts:
+            - dist/**
+            - node_modules/**
+      - step:
+          name: Rsync to production server and notify Mattermost
+          script:
+            # Stop the lobby process to commit changes
+            - ssh $ASTRO_USER@$ASTRO_SERVER "pm2 stop astrotest"
+
+            # Update the remote with rsync
+            - rsync -zrSlh --delete --stats ./* $ASTRO_USER@$ASTRO_SERVER:applications/epfjpzqykr/public_html/
+
+            # Copy .htaccess file to the server
+            - scp .htaccess $ASTRO_USER@$ASTRO_SERVER:applications/epfjpzqykr/public_html/
+
+            # Stop the lobby process to commit changes
+            - ssh $ASTRO_USER@$ASTRO_SERVER "pm2 start astrotest"
+
+            # Send message to MatterMost
+            - COMMIT_MESSAGE=$(git log --format=%B -n 1 $BITBUCKET_COMMIT)
+            - COMMIT_DATE=$(git log -n 1 --pretty=format:'%ci' $BITBUCKET_COMMIT)
+            - COMMIT_AUTHOR=$(git log -n 1 --pretty=format:'%an' $BITBUCKET_COMMIT)
+            - >
+              curl -d '{
+                  "channel": "wp-team-activity",
+                  "username": "Bitbucket Pipelines",
+                  "text": "New commit deployed to #AstroLatest **master** branch on ```Astro``` with the following message: \n ```\n'"$COMMIT_MESSAGE"'\nEnv: CloudWays\nDate: '"$COMMIT_DATE"'\nAuthor: '"$COMMIT_AUTHOR"'\n ```"
+                }' -H "Content-Type: application/json" -X POST https://matter.dblexchange.com/hooks/t34yjuo6a3refeeafr3itdauge
