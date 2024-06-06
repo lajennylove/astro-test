@@ -16,16 +16,16 @@ pipelines:
           name: Rsync to production server and notify Mattermost
           script:
             # Stop the lobby process to commit changes
-            - ssh $ASTRO_USER@$ASTRO_SERVER "pm2 stop astrotest"
+            #- ssh $ASTRO_USER@$ASTRO_SERVER "pm2 stop astrotest"
 
             # Update the remote with rsync
             - rsync -zrSlh --delete --stats ./* $ASTRO_USER@$ASTRO_SERVER:applications/epfjpzqykr/public_html/
 
             # Copy .htaccess file to the server
-            - scp .htaccess $ASTRO_USER@$ASTRO_SERVER:applications/epfjpzqykr/public_html/
+            #- scp .htaccess $ASTRO_USER@$ASTRO_SERVER:applications/epfjpzqykr/public_html/
 
             # Stop the lobby process to commit changes
-            - ssh $ASTRO_USER@$ASTRO_SERVER "pm2 start astrotest"
+            #- ssh $ASTRO_USER@$ASTRO_SERVER "pm2 start astrotest"
 
             # Send message to MatterMost
             - COMMIT_MESSAGE=$(git log --format=%B -n 1 $BITBUCKET_COMMIT)
