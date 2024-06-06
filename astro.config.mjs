@@ -6,7 +6,7 @@ import node from "@astrojs/node";
 export default defineConfig({
   integrations: [tailwind()],
   image: {
-    domains: ["astro.build"],
+    domains: ["astro.build", "phpstack-1233981-4615047.cloudwaysapps.com"],
     remotePatterns: [{ protocol: "http" }],
   },
   trailingSlash: "always",
