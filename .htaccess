@@ -6,4 +6,4 @@ RewriteCond %{REQUEST_URI} !(/$|\.)
 RewriteRule (.*) %{REQUEST_URI}/ [R=301,L]
 
 # Astro reverse proxy
-RewriteRule ^(.*)?$ http://127.0.0.1:4322/$1 [P,L]
+RewriteRule ^(.*)?$ http://127.0.0.1:4323/$1 [P,L]
